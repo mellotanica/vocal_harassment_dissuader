@@ -33,33 +33,27 @@ if configs_edited:
 
 whitelist = configs["vocal_harassment"]["whitelist"].split()
 
-client = TelegramClient("vocal harassment dissuader", configs["telegram_api"]["api_id"], configs["telegram_api"]["api_hash"], spawn_read_thread=False, update_workers=1)
+client = TelegramClient("global dissuader", configs["telegram_api"]["api_id"], configs["telegram_api"]["api_hash"], spawn_read_thread=False, update_workers=1)
 client.start()
 
 @client.on(events.NewMessage(incoming=True))
 def on_new_message(event):
+    check = True
     try:
-        check = True
-        try:
-            if event.sender.username in whitelist or event.sender.first_name in whitelist:
-                check = False
-        except:
-            pass
-        if check:
-            for a in event.document.attributes:
-                if a.voice:
-                    dest = event.message.to_id
-                    try:
-                        if dest.user_id == client.get_me().id:
-                            dest = event.message.from_id
-                    except:
-                        pass
-                    try:
-                        client.send_message(dest, configs["vocal_harassment"]["response"])
-                    except Exception as e:
-                        print(e)
-                    break
+        if event.sender.username in whitelist or event.sender.first_name in whitelist:
+            check = False
     except:
         pass
+    if check:
+        dest = event.message.to_id
+        try:
+            if dest.user_id == client.get_me().id:
+                dest = event.message.from_id
+        except:
+            pass
+        try:
+            client.send_message(dest, configs["vocal_harassment"]["response"])
+        except Exception as e:
+            print(e)
 
 client.idle()
