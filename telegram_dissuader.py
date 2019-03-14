@@ -36,28 +36,31 @@ whitelist = configs["vocal_harassment"]["whitelist"].split()
 client = TelegramClient("vocal harassment dissuader", configs["telegram_api"]["api_id"], configs["telegram_api"]["api_hash"], spawn_read_thread=False, update_workers=1)
 client.start()
 
+myself = client.get_me()
+
+print("Whitelisted users:")
+for w in whitelist:
+    print(w)
+
 @client.on(events.NewMessage(incoming=True))
 def on_new_message(event):
+    global myself
     try:
-        check = True
-        try:
-            if event.sender.username in whitelist or event.sender.first_name in whitelist:
-                check = False
-        except:
-            pass
-        if check:
-            for a in event.document.attributes:
+        dest = event.message.to_id
+        if dest.user_id == myself.id:
+                dest = event.message.from_id
+        if event.message.message is not None:
+            if "cracco" in event.message.message.lower():
+                try:
+                    client.send_message(dest, "chiiii?")
+                except:
+                    pass
+        sender = event.sender
+        if sender is not None and sender.username not in whitelist and sender.first_name not in whitelist and sender.id not in whitelist:
+            for a in event.message.document.attributes:
                 if a.voice:
-                    dest = event.message.to_id
-                    try:
-                        if dest.user_id == client.get_me().id:
-                            dest = event.message.from_id
-                    except:
-                        pass
-                    try:
-                        client.send_message(dest, configs["vocal_harassment"]["response"])
-                    except Exception as e:
-                        print(e)
+                    #print("received voice message from {} {} {} ({})".format(sender.username, sender.firts_name, sender.id, sender))
+                    client.send_message(dest, configs["vocal_harassment"]["response"])
                     break
     except:
         pass
